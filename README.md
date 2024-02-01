@@ -17,4 +17,5 @@
 - **Numpy**
 
 Make sure all dependencies are installed using pip:
+
 `pip install gdal rasterio geopandas numpy`
