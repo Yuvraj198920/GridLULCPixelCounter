@@ -8,8 +8,10 @@ from rasterio.features import geometry_mask
 import pandas as pd
 
 
-grid_path = "data/clipped_function_2021.shp"
-lulc_raster_path = "data/LULC_2021.tif"
+# grid_path = "data/grid_output/script_clipped_grid_2021.shp"
+# lulc_raster_path = "data/input/LULC_1988.tif"
+grid_path = "data/output/2006_grid.shp"
+lulc_raster_path = "data/input/LULC_ourthe1988.tif"
 
 # Load the raster layer
 lulc_raster = rasterio.open(lulc_raster_path)
@@ -59,7 +61,7 @@ for index, row in vector_layer.iterrows():
         if k in class_names:  # Ensure the class is one we're interested in
             named_counts[class_names[k]] = v
     # Include centroid coordinates and the grid cell ID
-    named_counts["grid_id"] = row["id"]  # Assuming there's an 'id' column in your grid
+    named_counts["grid_id"] = row["FID"]  # Assuming there's an 'id' column in your grid
     named_counts["latitude"] = row["latitude"]
     named_counts["longitude"] = row["longitude"]
 
@@ -67,4 +69,4 @@ for index, row in vector_layer.iterrows():
 
 # Convert class_counts to DataFrame and save as CSV
 df = pd.DataFrame(class_counts)
-df.to_csv("data/centroids_2021_classes_updated.csv", index=False)
+df.to_csv("data/output/centroids_1988_new.csv", index=False)
