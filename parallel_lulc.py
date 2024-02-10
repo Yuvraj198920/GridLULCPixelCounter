@@ -10,6 +10,8 @@ import time
 import logging
 from pathlib import Path
 
+from combine_csv import aggregate_csv_median
+
 # Setup basic configuration for logging
 logging.basicConfig(
     filename="processing_errors.log",
@@ -111,6 +113,9 @@ def main():
             future.result()
         # Optional: Wait for all futures to complete if you need to aggregate results or handle exceptions
 
+    # Post-Processing: Aggregate results from all CSVs into a combined median values CSV
+    aggregated_csv_path = os.path.join(output_dir, "combined_median.csv")
+    aggregate_csv_median(output_dir, aggregated_csv_path)
     end_time = time.perf_counter()
     # Calculate the execution time
     execution_time = end_time - start_time
