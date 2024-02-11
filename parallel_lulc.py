@@ -13,6 +13,8 @@ from pathlib import Path
 
 from combine_csv import aggregate_csv_median
 
+import traceback
+
 # Setup basic configuration for logging
 logging.basicConfig(
     filename="processing_errors.log",
@@ -102,6 +104,9 @@ def process_raster(input_raster_path, grid, output_path, queue=None):
                     }
                 )
     except Exception as e:
-        logging.error(f"Error processing {input_raster_path}: {e}")
-    if queue:
-        queue.put(f"Error processing {input_raster_path}")
+        # Log the error with traceback information
+        logging.error(
+            f"Error processing {input_raster_path}: {e}\n{traceback.format_exc()}"
+        )
+        if queue:
+            queue.put({"error": f"Error processing {input_raster_path}: {str(e)}"})
