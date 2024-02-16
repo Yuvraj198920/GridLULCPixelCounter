@@ -125,21 +125,27 @@ class RasterProcessingApp(tk.Tk):
         try:
             while True:  # Process all available messages
                 message = self.queue.get_nowait()
-                if "progress" in message:
-                    print(f"Updating progress: {message['progress']}")
-                    # Update the progress bar with the value from the message
-                    self.progress["value"] = message["progress"]
-                elif "complete" in message and message["complete"]:
-                    # Handle completion message
-                    messagebox.showinfo("Success", "Processing completed successfully.")
-                    self.reset_ui()
-                # Add handling for other message types as necessary
+                if isinstance(message, dict):
+                    if "progress" in message:
+                        # Ensure this print statement outputs expected progress values
+                        print(f"Updating progress: {message['progress']}")
+                        self.progress["value"] = message["progress"]
+                    if "complete" in message:
+                        messagebox.showinfo(
+                            "Success", "Processing completed successfully."
+                        )
+                        self.reset_ui()
+                    # Handle other dictionary-based messages here
         except Empty:
-            pass  # No more messages to process
+            # No more messages to process, schedule the next check
+            pass
         finally:
-            # Schedule the next check if the processing thread is still active
             if self.processing_thread.is_alive():
                 self.after(100, self.check_queue)
+            else:
+                # If the thread is no longer alive but no "complete" message was received,
+                # you might want to reset the UI or handle this as an error state.
+                self.reset_ui()
 
     def cancel_processing(self):
         # Implement functionality to safely terminate processing if possible
