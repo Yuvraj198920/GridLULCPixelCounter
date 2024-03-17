@@ -23,7 +23,6 @@ def create_grid(input_raster, output_grid, grid_size_meters):
     transform = raster.GetGeoTransform()
     x_min = transform[0]
     y_max = transform[3]
-
     cols = raster.RasterXSize
     rows = raster.RasterYSize
 
@@ -31,13 +30,14 @@ def create_grid(input_raster, output_grid, grid_size_meters):
     x_max = x_min + (cols * transform[1])
     y_min = y_max + (rows * transform[5])
 
-    # Convert grid size from meters to degrees
-    # Use the average latitude for the conversion
-    avg_latitude = (y_max + y_min) / 2
-    grid_size_degrees = meters_to_degrees(grid_size_meters, avg_latitude)
-    num_cells_x = math.ceil((x_max - x_min) / grid_size_degrees)
-    num_cells_y = math.ceil((y_max - y_min) / grid_size_degrees)
-    expected_total_cells = num_cells_x * num_cells_y
+    # Convert grid size from meters to degrees if needed
+    srs = osr.SpatialReference(wkt=raster.GetProjectionRef())
+    if srs.IsGeographic():
+        avg_latitude = (y_max + y_min) / 2
+        grid_size_degrees = meters_to_degrees(grid_size_meters, avg_latitude)
+    else:
+        grid_size_degrees = grid_size_meters
+
     # Create the output shapefile
     driver = ogr.GetDriverByName("ESRI Shapefile")
     if os.path.exists(output_grid):
@@ -45,11 +45,11 @@ def create_grid(input_raster, output_grid, grid_size_meters):
     grid_ds = driver.CreateDataSource(output_grid)
 
     # Set the spatial reference based on the input raster
-    srs = osr.SpatialReference()
-    srs.ImportFromWkt(raster.GetProjectionRef())
-
-    # Create the layer
-    layer = grid_ds.CreateLayer("grid_90_2", srs, geom_type=ogr.wkbPolygon)
+    layer = grid_ds.CreateLayer(
+        os.path.splitext(os.path.basename(output_grid))[0],
+        srs,
+        geom_type=ogr.wkbPolygon,
+    )
 
     # Add an ID field
     id_field = ogr.FieldDefn("id", ogr.OFTInteger)
@@ -62,6 +62,7 @@ def create_grid(input_raster, output_grid, grid_size_meters):
         x = x_min
         while x < x_max:
             id += 1
+
             # Create a square polygon
             ring = ogr.Geometry(ogr.wkbLinearRing)
             ring.AddPoint(x, y)
@@ -85,27 +86,5 @@ def create_grid(input_raster, output_grid, grid_size_meters):
             x += grid_size_degrees
         y -= grid_size_degrees
 
-    actual_total_cells = layer.GetFeatureCount()
-    if actual_total_cells == expected_total_cells:
-        print("Validation successful: The number of cells is correct.")
-    else:
-        print(
-            f"Validation failed: Expected {expected_total_cells} cells, but got {actual_total_cells} cells."
-        )
     # Close the shapefile
     grid_ds.Destroy()
-
-
-# create_grid(
-#     r"data/input/lulc_basin1988.tif", r"data/grid_output/grid_1988_from_script", 90
-# )
-if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python create_grid.py <input_raster> <output_grid> <grid_size>")
-        sys.exit(1)
-
-    input_raster = sys.argv[1]
-    output_grid = sys.argv[2]
-    grid_size = float(sys.argv[3])
-
-    create_grid(input_raster, output_grid, grid_size)
