@@ -29,11 +29,11 @@ Make sure all dependencies are installed using pip:
 - Run the GridLULCPixelCounter script with the necessary arguments:
 `python GridLULCPixelCounter.py --raster path/to/lulc_raster.tif --vector path/to/grid.shp --output path/to/output.csv`
 
-# Grid Creation
+## Grid Creation
 - Run `create_grid_tool.py` script to open the Tkinter interface.
 - Select the input raster file, specify the grid size (in meters), and choose the output path for the grid layer.
 - Click the "Create Grid" button to generate the grid.
-## Example
+### Example
 An example dataset is provided in the `example_data` folder. To run the script with the example data, navigate to the script directory and execute:
 `python GridLULCPixelCounter.py --raster example_data/lulc_raster.tif --vector example_data/grid.shp --output example_data/output.csv`
 For grid creation, use the Tkinter interface provided by `create_grid_tool.py`
