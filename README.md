@@ -36,3 +36,7 @@ Make sure all dependencies are installed using pip:
 ## Example
 An example dataset is provided in the `example_data` folder. To run the script with the example data, navigate to the script directory and execute:
 `python GridLULCPixelCounter.py --raster example_data/lulc_raster.tif --vector example_data/grid.shp --output example_data/output.csv`
+For grid creation, use the Tkinter interface provided by `create_grid_tool.py`
+
+# License
+This project is licensed under the MIT License - see the LICENSE file for details.
