@@ -1,8 +1,8 @@
 import os
 import sys
+import time
 from osgeo import gdal, ogr, osr
 import math
-
 
 def meters_to_degrees(meters, latitude):
     # Convert latitude to radians
@@ -12,7 +12,7 @@ def meters_to_degrees(meters, latitude):
     return degrees
 
 
-def create_grid(input_raster, output_grid, grid_size_meters):
+def create_grid(input_raster, output_grid, grid_size_meters, progress_callback):
     # Open the raster file
     raster = gdal.Open(input_raster)
     if raster is None:
@@ -54,7 +54,11 @@ def create_grid(input_raster, output_grid, grid_size_meters):
     # Add an ID field
     id_field = ogr.FieldDefn("id", ogr.OFTInteger)
     layer.CreateField(id_field)
-
+    total_cells = int((x_max - x_min) / grid_size_degrees) * int(
+        (y_max - y_min) / grid_size_degrees
+    )
+    last_update_time = time.time()
+    current_cell = 0
     # Generate the grid cells
     id = 0
     y = y_max
@@ -84,7 +88,13 @@ def create_grid(input_raster, output_grid, grid_size_meters):
             feature.Destroy()
 
             x += grid_size_degrees
+            current_cell += 1
+            current_time = time.time()
+            if current_time - last_update_time >= 3:
+                progress_callback(current_cell, total_cells)
+                last_update_time = current_time
         y -= grid_size_degrees
-
+    # Final update to the progress bar
+    progress_callback(total_cells, total_cells)
     # Close the shapefile
     grid_ds.Destroy()
