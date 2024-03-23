@@ -22,3 +22,9 @@ In addition to pixel counting, this toolset includes a grid creation script, `cr
 Make sure all dependencies are installed using pip:
 
 `pip install gdal rasterio geopandas numpy`
+
+# Usage
+## Pixel Counting
+- Prepare your raster (LULC data) and vector (grid) files. Ensure they are in the same CRS.
+- Run the GridLULCPixelCounter script with the necessary arguments:
+  `python GridLULCPixelCounter.py --raster path/to/lulc_raster.tif --vector path/to/grid.shp --output path/to/output.csv`
